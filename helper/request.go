@@ -25,6 +25,15 @@ func ParamID(c *fiber.Ctx) (int, bool) {
 	return id, true
 }
 
+// ParamInt membaca parameter jalur bernama name sebagai angka positif
+func ParamInt(c *fiber.Ctx, name string) (int, bool) {
+	v, err := strconv.Atoi(c.Params(name))
+	if err != nil || v < 1 {
+		return 0, false
+	}
+	return v, true
+}
+
 // ParseListQuery membaca query string dengan nilai bawaan yang aman
 // allowedSort berisi nama kolom yang boleh dipakai untuk ?sort=
 func ParseListQuery(c *fiber.Ctx, allowedSort map[string]bool) model.ListQuery {

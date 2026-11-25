@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"stokku/app/model"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -12,6 +13,7 @@ var (
 	ErrDuplicate  = errors.New("data duplikat")
 	ErrInUse      = errors.New("data masih dipakai")
 	ErrInvalidRef = errors.New("referensi tidak valid atau non-aktif")
+	ErrLocked 	  = errors.New("data terkunci karena sudah ada penerimaan")
 )
 
 // mapError menerjemahkan error pgx menjadi sentinel error milik repository
@@ -20,8 +22,15 @@ func mapError(err error) error {
 		return ErrNotFound
 	}
 	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-		return ErrDuplicate
+	if errors.As(err, &pgErr) {
+		switch pgErr.Code {
+		case "23505":
+			return ErrDuplicate
+		case "23503":
+			return  ErrInvalidRef
+		case "P0001":
+			return &model.RuleError{Message: pgErr.Message}
+		}
 	}
 	return err
 }

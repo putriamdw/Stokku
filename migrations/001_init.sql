@@ -145,6 +145,9 @@ BEGIN
     IF v_status <> 'draft' THEN
         RAISE EXCEPTION 'penjualan sudah final';
     END IF;
+    IF NOT EXISTS (SELECT 1 FROM detail_penjualan WHERE penjualan_id = p_penjualan_id) THEN
+        RAISE EXCEPTION 'penjualan belum memiliki detail';
+    END IF;
 
     FOR r IN SELECT barang_id, jumlah FROM detail_penjualan
              WHERE penjualan_id = p_penjualan_id ORDER BY barang_id LOOP
